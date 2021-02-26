@@ -1,18 +1,3 @@
-# Hello, world!
-#
-# This is an example function named 'hello'
-# which prints 'Hello, world!'.
-#
-# You can learn more about package authoring with RStudio at:
-#
-#   http://r-pkgs.had.co.nz/
-#
-# Some useful keyboard shortcuts for package authoring:
-#
-#   Install Package:           'Cmd + Shift + B'
-#   Check Package:             'Cmd + Shift + E'
-#   Test Package:              'Cmd + Shift + T'
-
 #' Perform a Bayes Factor \eqn{t}-test on two named groups in a dataframe
 #'
 #' @description
@@ -78,7 +63,7 @@ named_pair_ttestbf <- function(df, group_col=NA, data_col=NA, control=NA, test=N
          h_0 = c(null_hyp),
          h_1 = c(alt_hyp),
          BayesFactor = c(bf),
-         odds_h_1 = paste0("1:",bf),
+         odds_h_1 = paste0("1:",round(bf, 4)),
          summary = c(get_summ(bf))
   )
 
