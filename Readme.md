@@ -7,6 +7,12 @@ CRAN [here](https://cran.r-project.org/package=BayesFactor) and project
 webpage <http://bayesfactor.blogspot.com/>. Please use that in
 preference.
 
+
+## Installation
+``` r
+devtoolls::install_github("danmaclean/simplebf")
+```
+
 Using `simplebf` for a *t*-test
 -------------------------------
 
