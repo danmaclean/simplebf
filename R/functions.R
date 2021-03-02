@@ -158,7 +158,7 @@ named_pair_proportionbf <- function(df, group_col=NA, count_col=NA, control=NA, 
       tibble::as_tibble()
   }
 
-  ctable <- table(df[[group_col]], df[[count_col]])
+  ctable <- table(df[[count_col]], df[[group_col]] )
 
   null_hyp <- glue::glue("{test} proportions equal to {control} proportions")
   alt_hyp <- glue::glue("{test} proportions not equal to {control} proportions")
