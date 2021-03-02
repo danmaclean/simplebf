@@ -93,7 +93,6 @@ named_pair_ttestbf <- function(df, group_col=NA, data_col=NA, control=NA, test=N
 #' @examples
 #' allpairs_ttestbf(PlantGrowth, group_col='group', data_col='weight')
 #' @export
-#' @export
 allpairs_ttestbf <- function(df, group_col=NA, data_col=NA, h_1 = "test_greater_than_control", rscale="medium"){
 
   check <- ArgumentCheck::newArgCheck()
@@ -124,6 +123,61 @@ allpairs_ttestbf <- function(df, group_col=NA, data_col=NA, h_1 = "test_greater_
     }
   ) %>%
     dplyr::bind_rows()
+}
+
+#' @export
+allpairs_proportionbf <- function(df, group_col="NA", count_col="NA", sample_type="indepMulti"){
+  if (! "tbl_df" %in% class(df)){
+    df <- dplyr::mutate_if(df, is.factor, as.character) %>%
+      tibble::as_tibble()
+  }
+
+  pairs <- expand.grid(unique(df[[group_col]]), unique(df[[group_col]]) ) %>%
+    dplyr::filter(Var1 != Var2) %>%
+    dplyr::rename(control = Var1, test = Var2) %>%
+    dplyr::mutate_if( is.factor, as.character) %>%
+    tibble::as_tibble()
+
+  purrr::map2(
+    pairs$control, pairs$test,
+    function(control,test){
+      named_pair_proportionbf(df, group_col = group_col, count_col = count_col, control = control, test = test, sample_type = sample_type)
+    }
+  ) %>%
+    dplyr::bind_rows()
+
+}
+
+#' @export
+named_pair_proportionbf <- function(df, group_col=NA, count_col=NA, control=NA, test=NA, sample_type="indepMulti") {
+
+  #argcheck(df,group_col,data_col,control,test,h_1,rscale)
+
+  if (! "tbl_df" %in% class(df)){
+    df <- dplyr::mutate_if(df, is.factor, as.character) %>%
+      tibble::as_tibble()
+  }
+
+  ctable <- table(df[[group_col]], df[[count_col]])
+
+  null_hyp <- glue::glue("{test} proportions equal to {control} proportions")
+  alt_hyp <- glue::glue("{test} proportions not equal to {control} proportions")
+
+
+  bfres <- BayesFactor::contingencyTableBF(ctable,
+                                sampleType = sample_type,
+                                fixedMargin = "cols")
+
+  bf <- BayesFactor::extractBF(bfres)$bf[1]
+  summ <- get_summ(bf)
+  data.frame(
+    control_group = c(control),
+    test_group = c(test),
+    BayesFactor = c(bf),
+    odds_h_1 = paste0("1:",round(bf, 4)),
+    summary = c(get_summ(bf))
+  )
+
 }
 
 get_summ <- function(bf){
