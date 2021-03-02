@@ -168,7 +168,7 @@ named_pair_proportionbf <- function(df, group_col=NA, count_col=NA, control=NA, 
                                 sampleType = sample_type,
                                 fixedMargin = "cols")
 
-  bf <- BayesFactor::extractBF(bfres)$bf[1]
+  bf <- BayesFactor::extractBF(bfres)$bf
   summ <- get_summ(bf)
   data.frame(
     control_group = c(control),
