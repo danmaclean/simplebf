@@ -132,11 +132,8 @@ allpairs_proportionbf <- function(df, group_col="NA", count_col="NA", sample_typ
       tibble::as_tibble()
   }
 
-  pairs <- expand.grid(unique(df[[group_col]]), unique(df[[group_col]]) ) %>%
-    dplyr::filter(Var1 != Var2) %>%
-    dplyr::rename(control = Var1, test = Var2) %>%
-    dplyr::mutate_if( is.factor, as.character) %>%
-    tibble::as_tibble()
+  pairs <- tibble::as_tibble(t(combn(unique(df[[group_col]]),2)), .name_repair="unique") %>%
+    dplyr::rename(control = ...1, test = ...2)
 
   purrr::map2(
     pairs$control, pairs$test,
@@ -157,9 +154,14 @@ named_pair_proportionbf <- function(df, group_col=NA, count_col=NA, control=NA, 
     df <- dplyr::mutate_if(df, is.factor, as.character) %>%
       tibble::as_tibble()
   }
-
+  print(df)
+  print(control)
+  print(test)
+  print(group_col)
+  df <- df %>% dplyr::filter(.data[[group_col]] %in% c(control, test))
+  print(df)
   ctable <- table(df[[count_col]], df[[group_col]] )
-
+  print(ctable)
   null_hyp <- glue::glue("{test} proportions equal to {control} proportions")
   alt_hyp <- glue::glue("{test} proportions not equal to {control} proportions")
 
@@ -173,6 +175,8 @@ named_pair_proportionbf <- function(df, group_col=NA, count_col=NA, control=NA, 
   data.frame(
     control_group = c(control),
     test_group = c(test),
+    h_0 = c(null_hyp),
+    h_1 = c(alt_hyp),
     BayesFactor = c(bf),
     odds_h_1 = paste0("1:",round(bf, 4)),
     summary = c(get_summ(bf))
