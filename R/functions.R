@@ -68,6 +68,9 @@ named_pair_ttestbf <- function(df, group_col=NA, data_col=NA, control=NA, test=N
   )
 
 }
+
+
+
 #' Automates Bayes Factor \eqn{t}-test on all pairs of groups in a dataframe
 #' @description
 #'
@@ -125,6 +128,29 @@ allpairs_ttestbf <- function(df, group_col=NA, data_col=NA, h_1 = "test_greater_
     dplyr::bind_rows()
 }
 
+#' Automates Bayes Factor proportion test on all pairs of groups in a dataframe
+#' @description
+#'
+#' Performs a Bayes factor proportoin test for all pairs of groups in a named group column in the provided
+#' dataframe. Group pairings are made in one direction only since order makes no difference.
+#' A thin wrapper around the `BayesFactor::contingencyTableBF()` function. Always set up so that effect size is test - control.
+#'
+#' @param df dataframe
+#' @param group_col name of column with group names
+#' @param data_col name of column with measurements in
+#' @param sample_type sampling scheme, one of `c("indepMulti", "jointMulti", "poisson")` default = "indepMulti"
+#' @return dataframe with 7 columns
+#' \enumerate{
+#' \item `control_group` - the name of the group considered control
+#' \item. `test_group` - the group considered test
+#' \item `h_0` - statement of the $H_0$ hypothesis
+#' \item `h_1` - statement of the $H_1$ hypothesis
+#' \item `BayesFactor` - the resulting Bayes Factor from \eqn{H_{1}/H_{0}}
+#' \item `odds_h_1` - statement of the Bayes Factor in terms of odds $H_0:H_1$
+#' \item `summary` - summary statement of relative evidence for the hypothesis
+#' }
+#' @examples
+#' allpairs_ttestbf(PlantGrowth, group_col='group', data_col='weight')
 #' @export
 allpairs_proportionbf <- function(df, group_col="NA", count_col="NA", sample_type="indepMulti"){
   if (! "tbl_df" %in% class(df)){
@@ -145,23 +171,42 @@ allpairs_proportionbf <- function(df, group_col="NA", count_col="NA", sample_typ
 
 }
 
+#' Perform a Bayes Factor contingency table test on two named groups in a dataframe
+#'
+#' @description
+#'
+#' Performs a Bayes factor contingency table test on a named test and control group in the provided
+#' dataframe. A thin wrapper around the `BayesFactor::contingencyTableBF()` function. Always set up so that effect size is test - control.
+#'
+#' @param df dataframe
+#' @param group_col name of column with group names
+#' @param data_col name of column with measurements in
+#' @param control name of control group
+#' @param test name of test group
+#' @param sample_type sampling scheme, one of `c("indepMulti", "jointMulti", "poisson")` default = "indepMulti"
+#' @return dataframe with one row and 7 columns
+#' \enumerate{
+#' \item `control_group` - the name of the group considered control
+#' \item. `test_group` - the group considered test
+#' \item `h_0` - statement of the $H_0$ hypothesis
+#' \item `h_1` - statement of the $H_1$ hypothesis
+#' \item `BayesFactor` - the resulting Bayes Factor from \eqn{H_{1}/H_{0}}
+#' \item `odds_h_1` - statement of the Bayes Factor in terms of odds $H_0:H_1$
+#' \item `summary` - summary statement of relative evidence for the hypothesis
+#' }
+#' @examples
+#' named_pair_proportionbf(PlantGrowth, group_col='group', data_col='weight', control='crtl', test='trt2')
 #' @export
 named_pair_proportionbf <- function(df, group_col=NA, count_col=NA, control=NA, test=NA, sample_type="indepMulti") {
 
-  #argcheck(df,group_col,data_col,control,test,h_1,rscale)
+  argcheck_proportion(df,group_col,data_col,control,test,sample_type)
 
   if (! "tbl_df" %in% class(df)){
     df <- dplyr::mutate_if(df, is.factor, as.character) %>%
       tibble::as_tibble()
   }
-  print(df)
-  print(control)
-  print(test)
-  print(group_col)
   df <- df %>% dplyr::filter(.data[[group_col]] %in% c(control, test))
-  print(df)
   ctable <- table(df[[count_col]], df[[group_col]] )
-  print(ctable)
   null_hyp <- glue::glue("{test} proportions equal to {control} proportions")
   alt_hyp <- glue::glue("{test} proportions not equal to {control} proportions")
 
@@ -269,6 +314,70 @@ argcheck <- function(df, group_col, data_col, control, test, h_1,rscale){
     ArgumentCheck::addError(
       msg = glue::glue("rscale value incorrect - must be one of:
                        {glue::glue_collapse( c('medium', 'wide', 'ultrawide'), sep='\\n') }"),
+      argcheck = check
+    )
+  }
+  ArgumentCheck::finishArgCheck(check)
+}
+argcheck_proportion <- function(df, group_col, data_col, control, test, sample_type){
+  if (is.na(group_col) ){
+    ArgumentCheck::addError(
+      msg = "No value for argument group_col specified",
+      argcheck = check
+    )
+  }
+  if (is.na(data_col)){
+    ArgumentCheck::addError(
+      msg = "No value for argument data_col specified",
+      argcheck = check
+    )
+  }
+  if (is.na(control)){
+    ArgumentCheck::addError(
+      msg = "No value for argument control (control group factor level) specified",
+      argcheck = check
+    )
+  }
+  if (is.na(test)){
+    ArgumentCheck::addError(
+      msg = "No value for argument test (test group factor level) specified",
+      argcheck = check
+    )
+  }
+  if (is.null(df)){
+    ArgumentCheck::addError(
+      msg = "No data frame provided",
+      argcheck = check
+    )
+  }
+  if (!group_col %in% colnames(df)){
+    ArgumentCheck::addError(
+      msg = glue::glue("{group_col} not found in dataframe"),
+      argcheck = check
+    )
+  }
+  if (!data_col %in% colnames(df)){
+    ArgumentCheck::addError(
+      msg = glue::glue("{data_col} not found in dataframe"),
+      argcheck = check
+    )
+  }
+  if (!control %in% df[[group_col]]){
+    ArgumentCheck::addError(
+      msg = glue::glue("{control} not found in {group_col}"),
+      argcheck = check
+    )
+  }
+  if (!test %in% df[[group_col]]){
+    ArgumentCheck::addError(
+      msg = glue::glue("{test} not found in {group_col}"),
+      argcheck = check
+    )
+  }
+  if (!sample_type %in% c("indepMulti", "jointMulti", "poisson")){
+    ArgumentCheck::addError(
+      msg = glue::glue("sample_type value incorrect - must be one of:
+                       {glue::glue_collapse( c('indepMulti', 'jointMulti', 'poisson'), sep='\\n') }"),
       argcheck = check
     )
   }
