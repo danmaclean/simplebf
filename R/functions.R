@@ -158,7 +158,7 @@ allpairs_proportionbf <- function(df, group_col="NA", count_col="NA", sample_typ
       tibble::as_tibble()
   }
 
-  pairs <- tibble::as_tibble(t(combn(unique(df[[group_col]]),2)), .name_repair="unique") %>%
+  pairs <- suppressMessages(tibble::as_tibble(t(combn(unique(df[[group_col]]),2)), .name_repair="unique")) %>%
     dplyr::rename(control = ...1, test = ...2)
 
   purrr::map2(
@@ -199,7 +199,7 @@ allpairs_proportionbf <- function(df, group_col="NA", count_col="NA", sample_typ
 #' @export
 named_pair_proportionbf <- function(df, group_col=NA, count_col=NA, control=NA, test=NA, sample_type="indepMulti") {
 
-  argcheck_proportion(df,group_col,data_col,control,test,sample_type)
+  argcheck_proportion(df,group_col,count_col,control,test,sample_type)
 
   if (! "tbl_df" %in% class(df)){
     df <- dplyr::mutate_if(df, is.factor, as.character) %>%
@@ -319,16 +319,17 @@ argcheck <- function(df, group_col, data_col, control, test, h_1,rscale){
   }
   ArgumentCheck::finishArgCheck(check)
 }
-argcheck_proportion <- function(df, group_col, data_col, control, test, sample_type){
+argcheck_proportion <- function(df, group_col, count_col, control, test, sample_type){
+  check <- ArgumentCheck::newArgCheck()
   if (is.na(group_col) ){
     ArgumentCheck::addError(
       msg = "No value for argument group_col specified",
       argcheck = check
     )
   }
-  if (is.na(data_col)){
+  if (is.na(count_col)){
     ArgumentCheck::addError(
-      msg = "No value for argument data_col specified",
+      msg = "No value for argument count_col specified",
       argcheck = check
     )
   }
@@ -356,7 +357,7 @@ argcheck_proportion <- function(df, group_col, data_col, control, test, sample_t
       argcheck = check
     )
   }
-  if (!data_col %in% colnames(df)){
+  if (!count_col %in% colnames(df)){
     ArgumentCheck::addError(
       msg = glue::glue("{data_col} not found in dataframe"),
       argcheck = check
