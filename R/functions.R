@@ -27,7 +27,7 @@
 #' @export
 named_pair_ttestbf <- function(df, group_col=NA, data_col=NA, control=NA, test=NA, h_1 = "test_greater_than_control", rscale="medium") {
 
-  argcheck(df,group_col,data_col,control,test,h_1,rscale)
+  #argcheck(df,group_col,data_col,control,test,h_1,rscale)
 
   if (! "tbl_df" %in% class(df)){
     df <- dplyr::mutate_if(df, is.factor, as.character) %>%
@@ -98,15 +98,15 @@ named_pair_ttestbf <- function(df, group_col=NA, data_col=NA, control=NA, test=N
 #' @export
 allpairs_ttestbf <- function(df, group_col=NA, data_col=NA, h_1 = "test_greater_than_control", rscale="medium"){
 
-  check <- ArgumentCheck::newArgCheck()
-  if (is.na(group_col) | is.na(data_col)) {
-    ArgumentCheck::addError(
-      msg = "group_col or data_col not defined.",
-      check = check
-    )
-  }
+  # check <- ArgumentCheck::newArgCheck()
+  # if (is.na(group_col) | is.na(data_col)) {
+  #   ArgumentCheck::addError(
+  #     msg = "group_col or data_col not defined.",
+  #     check = check
+  #   )
+  # }
 
-  ArgumentCheck::finishArgCheck(check)
+  #ArgumentCheck::finishArgCheck(check)
 
   if (! "tbl_df" %in% class(df)){
   df <- dplyr::mutate_if(df, is.factor, as.character) %>%
@@ -199,7 +199,7 @@ allpairs_proportionbf <- function(df, group_col="NA", count_col="NA", sample_typ
 #' @export
 named_pair_proportionbf <- function(df, group_col=NA, count_col=NA, control=NA, test=NA, sample_type="indepMulti") {
 
-  argcheck_proportion(df,group_col,count_col,control,test,sample_type)
+  #argcheck_proportion(df,group_col,count_col,control,test,sample_type)
 
   if (! "tbl_df" %in% class(df)){
     df <- dplyr::mutate_if(df, is.factor, as.character) %>%
@@ -241,146 +241,146 @@ get_summ <- function(bf){
   else if (bf > 1/100 & bf < 1/30) "Very strong evidence for H_0 compared to H_1"
   else if (bf < 1/100) "Extreme evidence for H_0 compared to H_1"
 }
-argcheck <- function(df, group_col, data_col, control, test, h_1,rscale){
-  hypotheses <- c(
-    "test_greater_than_control",
-    "test_smaller_than_control",
-    "test_not_equal_to_control"
-  )
-  check <- ArgumentCheck::newArgCheck()
-  if (!h_1 %in% hypotheses){
-    ArgumentCheck::addError(
-      msg = glue::glue(
-        "Unknown H1 specified - must be one of:
-      {glue::glue_collapse(hypotheses, sep='\\n') }"),
-      argcheck = check
-    )
-  }
-  if (is.na(group_col) ){
-    ArgumentCheck::addError(
-      msg = "No value for argument group_col specified",
-      argcheck = check
-    )
-  }
-  if (is.na(data_col)){
-    ArgumentCheck::addError(
-      msg = "No value for argument data_col specified",
-      argcheck = check
-    )
-  }
-  if (is.na(control)){
-    ArgumentCheck::addError(
-      msg = "No value for argument control (control group factor level) specified",
-      argcheck = check
-    )
-  }
-  if (is.na(test)){
-    ArgumentCheck::addError(
-      msg = "No value for argument test (test group factor level) specified",
-      argcheck = check
-    )
-  }
-  if (is.null(df)){
-    ArgumentCheck::addError(
-      msg = "No data frame provided",
-      argcheck = check
-    )
-  }
-  if (!group_col %in% colnames(df)){
-    ArgumentCheck::addError(
-      msg = glue::glue("{group_col} not found in dataframe"),
-      argcheck = check
-    )
-  }
-  if (!data_col %in% colnames(df)){
-    ArgumentCheck::addError(
-      msg = glue::glue("{data_col} not found in dataframe"),
-      argcheck = check
-    )
-  }
-  if (!control %in% df[[group_col]]){
-    ArgumentCheck::addError(
-      msg = glue::glue("{control} not found in {group_col}"),
-      argcheck = check
-    )
-  }
-  if (!test %in% df[[group_col]]){
-    ArgumentCheck::addError(
-      msg = glue::glue("{test} not found in {group_col}"),
-      argcheck = check
-    )
-  }
-  if (!rscale %in% c("medium", "wide", "ultrawide")){
-    ArgumentCheck::addError(
-      msg = glue::glue("rscale value incorrect - must be one of:
-                       {glue::glue_collapse( c('medium', 'wide', 'ultrawide'), sep='\\n') }"),
-      argcheck = check
-    )
-  }
-  ArgumentCheck::finishArgCheck(check)
-}
-argcheck_proportion <- function(df, group_col, count_col, control, test, sample_type){
-  check <- ArgumentCheck::newArgCheck()
-  if (is.na(group_col) ){
-    ArgumentCheck::addError(
-      msg = "No value for argument group_col specified",
-      argcheck = check
-    )
-  }
-  if (is.na(count_col)){
-    ArgumentCheck::addError(
-      msg = "No value for argument count_col specified",
-      argcheck = check
-    )
-  }
-  if (is.na(control)){
-    ArgumentCheck::addError(
-      msg = "No value for argument control (control group factor level) specified",
-      argcheck = check
-    )
-  }
-  if (is.na(test)){
-    ArgumentCheck::addError(
-      msg = "No value for argument test (test group factor level) specified",
-      argcheck = check
-    )
-  }
-  if (is.null(df)){
-    ArgumentCheck::addError(
-      msg = "No data frame provided",
-      argcheck = check
-    )
-  }
-  if (!group_col %in% colnames(df)){
-    ArgumentCheck::addError(
-      msg = glue::glue("{group_col} not found in dataframe"),
-      argcheck = check
-    )
-  }
-  if (!count_col %in% colnames(df)){
-    ArgumentCheck::addError(
-      msg = glue::glue("{data_col} not found in dataframe"),
-      argcheck = check
-    )
-  }
-  if (!control %in% df[[group_col]]){
-    ArgumentCheck::addError(
-      msg = glue::glue("{control} not found in {group_col}"),
-      argcheck = check
-    )
-  }
-  if (!test %in% df[[group_col]]){
-    ArgumentCheck::addError(
-      msg = glue::glue("{test} not found in {group_col}"),
-      argcheck = check
-    )
-  }
-  if (!sample_type %in% c("indepMulti", "jointMulti", "poisson")){
-    ArgumentCheck::addError(
-      msg = glue::glue("sample_type value incorrect - must be one of:
-                       {glue::glue_collapse( c('indepMulti', 'jointMulti', 'poisson'), sep='\\n') }"),
-      argcheck = check
-    )
-  }
-  ArgumentCheck::finishArgCheck(check)
-}
+# argcheck <- function(df, group_col, data_col, control, test, h_1,rscale){
+#   hypotheses <- c(
+#     "test_greater_than_control",
+#     "test_smaller_than_control",
+#     "test_not_equal_to_control"
+#   )
+#   check <- ArgumentCheck::newArgCheck()
+#   if (!h_1 %in% hypotheses){
+#     ArgumentCheck::addError(
+#       msg = glue::glue(
+#         "Unknown H1 specified - must be one of:
+#       {glue::glue_collapse(hypotheses, sep='\\n') }"),
+#       argcheck = check
+#     )
+#   }
+#   if (is.na(group_col) ){
+#     ArgumentCheck::addError(
+#       msg = "No value for argument group_col specified",
+#       argcheck = check
+#     )
+#   }
+#   if (is.na(data_col)){
+#     ArgumentCheck::addError(
+#       msg = "No value for argument data_col specified",
+#       argcheck = check
+#     )
+#   }
+#   if (is.na(control)){
+#     ArgumentCheck::addError(
+#       msg = "No value for argument control (control group factor level) specified",
+#       argcheck = check
+#     )
+#   }
+#   if (is.na(test)){
+#     ArgumentCheck::addError(
+#       msg = "No value for argument test (test group factor level) specified",
+#       argcheck = check
+#     )
+#   }
+#   if (is.null(df)){
+#     ArgumentCheck::addError(
+#       msg = "No data frame provided",
+#       argcheck = check
+#     )
+#   }
+#   if (!group_col %in% colnames(df)){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("{group_col} not found in dataframe"),
+#       argcheck = check
+#     )
+#   }
+#   if (!data_col %in% colnames(df)){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("{data_col} not found in dataframe"),
+#       argcheck = check
+#     )
+#   }
+#   if (!control %in% df[[group_col]]){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("{control} not found in {group_col}"),
+#       argcheck = check
+#     )
+#   }
+#   if (!test %in% df[[group_col]]){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("{test} not found in {group_col}"),
+#       argcheck = check
+#     )
+#   }
+#   if (!rscale %in% c("medium", "wide", "ultrawide")){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("rscale value incorrect - must be one of:
+#                        {glue::glue_collapse( c('medium', 'wide', 'ultrawide'), sep='\\n') }"),
+#       argcheck = check
+#     )
+#   }
+#   ArgumentCheck::finishArgCheck(check)
+# }
+# argcheck_proportion <- function(df, group_col, count_col, control, test, sample_type){
+#   check <- ArgumentCheck::newArgCheck()
+#   if (is.na(group_col) ){
+#     ArgumentCheck::addError(
+#       msg = "No value for argument group_col specified",
+#       argcheck = check
+#     )
+#   }
+#   if (is.na(count_col)){
+#     ArgumentCheck::addError(
+#       msg = "No value for argument count_col specified",
+#       argcheck = check
+#     )
+#   }
+#   if (is.na(control)){
+#     ArgumentCheck::addError(
+#       msg = "No value for argument control (control group factor level) specified",
+#       argcheck = check
+#     )
+#   }
+#   if (is.na(test)){
+#     ArgumentCheck::addError(
+#       msg = "No value for argument test (test group factor level) specified",
+#       argcheck = check
+#     )
+#   }
+#   if (is.null(df)){
+#     ArgumentCheck::addError(
+#       msg = "No data frame provided",
+#       argcheck = check
+#     )
+#   }
+#   if (!group_col %in% colnames(df)){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("{group_col} not found in dataframe"),
+#       argcheck = check
+#     )
+#   }
+#   if (!count_col %in% colnames(df)){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("{data_col} not found in dataframe"),
+#       argcheck = check
+#     )
+#   }
+#   if (!control %in% df[[group_col]]){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("{control} not found in {group_col}"),
+#       argcheck = check
+#     )
+#   }
+#   if (!test %in% df[[group_col]]){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("{test} not found in {group_col}"),
+#       argcheck = check
+#     )
+#   }
+#   if (!sample_type %in% c("indepMulti", "jointMulti", "poisson")){
+#     ArgumentCheck::addError(
+#       msg = glue::glue("sample_type value incorrect - must be one of:
+#                        {glue::glue_collapse( c('indepMulti', 'jointMulti', 'poisson'), sep='\\n') }"),
+#       argcheck = check
+#     )
+#   }
+#   ArgumentCheck::finishArgCheck(check)
+# }
