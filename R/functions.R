@@ -384,3 +384,9 @@ get_summ <- function(bf){
 #   }
 #   ArgumentCheck::finishArgCheck(check)
 # }
+
+test_func <- function(){
+  
+  "This function exists only to make a PR
+
+}
