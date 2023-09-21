@@ -387,6 +387,6 @@ get_summ <- function(bf){
 
 test_func <- function(){
   
-  "This function exists only to make a PR
+  "This function exists only to make a PR"
 
 }
